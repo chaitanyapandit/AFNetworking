@@ -44,7 +44,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _af_sharedImageRequestOperationQueue = [[NSOperationQueue alloc] init];
-        _af_sharedImageRequestOperationQueue.maxConcurrentOperationCount = NSOperationQueueDefaultMaxConcurrentOperationCount;
+        _af_sharedImageRequestOperationQueue.maxConcurrentOperationCount = 1;
     });
 
     return _af_sharedImageRequestOperationQueue;
@@ -91,6 +91,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _af_defaultImageResponseSerializer = [AFImageResponseSerializer serializer];
+        [(AFImageResponseSerializer *) _af_defaultImageResponseSerializer setAutomaticallyInflatesResponseImage:NO];
     });
 
 #pragma clang diagnostic push
