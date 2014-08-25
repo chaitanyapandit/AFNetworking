@@ -64,21 +64,28 @@ static dispatch_group_t http_request_operation_completion_group() {
     if (!self) {
         return nil;
     }
-
+    
     self.responseSerializer = [AFHTTPResponseSerializer serializer];
     
     // Cache response against the original request URL instead of the redirected URL
     [self setCacheResponseBlock:^NSCachedURLResponse *(NSURLConnection *connection, NSCachedURLResponse *cachedResponse) {
         
-        NSCachedURLResponse *retVal = cachedResponse;
-        NSHTTPURLResponse *originalResponse = (NSHTTPURLResponse *)[cachedResponse response];
-        if ([originalResponse isKindOfClass:[NSHTTPURLResponse class]])
+        if (connection.originalRequest.cachePolicy == NSURLRequestReloadIgnoringLocalCacheData)
         {
-            NSHTTPURLResponse *tweakedResponse = [[NSHTTPURLResponse alloc] initWithURL:connection.originalRequest.URL statusCode:originalResponse.statusCode HTTPVersion:@"HTTP/1.1" headerFields:[originalResponse allHeaderFields]];
-            retVal = [[NSCachedURLResponse alloc] initWithResponse:tweakedResponse data:cachedResponse.data];
+            return nil;
         }
-        
-        return retVal;
+        else
+        {
+            NSCachedURLResponse *retVal = cachedResponse;
+            NSHTTPURLResponse *originalResponse = (NSHTTPURLResponse *)[cachedResponse response];
+            if ([originalResponse isKindOfClass:[NSHTTPURLResponse class]])
+            {
+                NSHTTPURLResponse *tweakedResponse = [[NSHTTPURLResponse alloc] initWithURL:connection.originalRequest.URL statusCode:originalResponse.statusCode HTTPVersion:@"HTTP/1.1" headerFields:[originalResponse allHeaderFields]];
+                retVal = [[NSCachedURLResponse alloc] initWithResponse:tweakedResponse data:cachedResponse.data];
+            }
+            
+            return retVal;
+        }
     }];
     
     return self;
