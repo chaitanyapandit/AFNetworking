@@ -70,7 +70,7 @@ static dispatch_group_t http_request_operation_completion_group() {
     // Cache response against the original request URL instead of the redirected URL
     [self setCacheResponseBlock:^NSCachedURLResponse *(NSURLConnection *connection, NSCachedURLResponse *cachedResponse) {
         
-        if (connection.originalRequest.cachePolicy == NSURLRequestReloadIgnoringLocalCacheData)
+        if (connection.originalRequest.cachePolicy == NSURLRequestReloadIgnoringLocalCacheData || connection.originalRequest.cachePolicy == NSURLRequestReloadIgnoringLocalAndRemoteCacheData)
         {
             return nil;
         }
