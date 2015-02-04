@@ -80,7 +80,12 @@ static dispatch_group_t http_request_operation_completion_group() {
             NSHTTPURLResponse *originalResponse = (NSHTTPURLResponse *)[cachedResponse response];
             if ([originalResponse isKindOfClass:[NSHTTPURLResponse class]])
             {
-                NSHTTPURLResponse *tweakedResponse = [[NSHTTPURLResponse alloc] initWithURL:connection.originalRequest.URL statusCode:originalResponse.statusCode HTTPVersion:@"HTTP/1.1" headerFields:[originalResponse allHeaderFields]];
+                NSMutableDictionary *headerFields = [originalResponse allHeaderFields].mutableCopy;
+                if (!headerFields)
+                    headerFields = [[NSMutableDictionary alloc] init];
+                // WAS-REDIRECTED gives us a chance to store the response against the original request URL in our custom NSURLCache
+                headerFields[@"WAS-REDIRECTED"] = @"YES";
+                NSHTTPURLResponse *tweakedResponse = [[NSHTTPURLResponse alloc] initWithURL:connection.originalRequest.URL statusCode:originalResponse.statusCode HTTPVersion:@"HTTP/1.1" headerFields:headerFields];
                 retVal = [[NSCachedURLResponse alloc] initWithResponse:tweakedResponse data:cachedResponse.data];
             }
             
